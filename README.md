@@ -4,9 +4,6 @@ This project implements a Data Warehouse (DW) solution for New York City real es
 
 ## 📁 Repository Structure
 
-
-## 📌 Project Description
-.
 ├── scriptSQL/
 │ ├── createReconcilied.sql # Creates the reconciled schema based on logical schema reengineering
 │ ├── populateReconcilied.sql # Populates the reconciled schema with cleaned and integrated data
@@ -16,7 +13,7 @@ This project implements a Data Warehouse (DW) solution for New York City real es
 ├── preprocess_dataset.py # Cleans and integrates the NYC property sales dataset
 ├── preprocess_dataset_indici.py # Cleans and integrates the Neighborhood Financial Health Indication dataset and merges it with the NYC dataset
 ├── preprocess_summary_table.py # Performs data quality analysis and generates summary tables
-The project follows these main phases:
+## 📌 Project Description
 
 ### 1. Preprocessing Phase
 - `preprocess_dataset.py`: Cleans and integrates the **NYC property sales** dataset.
