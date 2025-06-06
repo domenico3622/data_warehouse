@@ -1,0 +1,67 @@
+-- Crea la tabella Borough
+CREATE TABLE borough (
+    id SERIAL PRIMARY KEY,
+    borough_name TEXT NOT NULL UNIQUE
+);
+
+-- Crea la tabella Neighborhood
+CREATE TABLE neighborhood (
+    id SERIAL PRIMARY KEY,
+    neighborhood_name TEXT NOT NULL UNIQUE
+);
+
+-- Crea la tabella Place (normalizzazione di indirizzi)
+CREATE TABLE place (
+    id SERIAL PRIMARY KEY,
+    borough_id INTEGER REFERENCES borough(id),
+    neighborhood_id INTEGER REFERENCES neighborhood(id),
+    address TEXT NOT NULL,
+    UNIQUE (borough_id, neighborhood_id, address)
+);
+
+-- Crea la tabella Property
+CREATE TABLE property (
+    id SERIAL PRIMARY KEY,
+    zip_code TEXT,
+    residential_units INTEGER,
+    commercial_units INTEGER,
+    total_units INTEGER,
+    land_square_feet BIGINT,
+    year_built INTEGER,
+    building_class_category TEXT,
+    building_macro_class_category TEXT,
+    land_square_category TEXT,
+    borough_id INTEGER REFERENCES borough(id),
+    block INTEGER NOT NULL,
+    lot INTEGER NOT NULL,
+    place_id INTEGER REFERENCES place(id),
+    UNIQUE (borough_id, block, lot)
+);
+
+-- Crea la tabella Sale
+CREATE TABLE sale (
+    id SERIAL PRIMARY KEY,
+    sale_date DATE NOT NULL,
+    sale_price BIGINT NOT NULL,
+    property_id INTEGER REFERENCES property(id)
+);
+
+-- Crea la tabella CrimeIndex
+CREATE TABLE crime_index (
+    id SERIAL PRIMARY KEY,
+    borough_id INTEGER REFERENCES borough(id),
+    crime_index NUMERIC NOT null
+    UNIQUE (borough_id)
+);
+
+-- Crea la tabella NeighborhoodStats
+CREATE TABLE neighborhood_stats (
+    id SERIAL PRIMARY KEY,
+    neighborhood_id INTEGER REFERENCES neighborhood(id),
+    poverty_rate NUMERIC,
+    median_income NUMERIC,
+    perc_white NUMERIC,
+    perc_black numeric
+    UNIQUE (neighborhood_id)
+);
+--DROP TABLE raw_data;
