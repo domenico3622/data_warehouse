@@ -1,0 +1,70 @@
+-- Inserisci nella tabella borough
+INSERT INTO borough (borough_name)
+SELECT DISTINCT "borough"
+FROM raw_data
+ON CONFLICT (borough_name) DO NOTHING;
+
+-- Inserisci nella tabella neighborhood
+INSERT INTO neighborhood (neighborhood_name)
+SELECT DISTINCT "neighborhood"
+FROM raw_data
+ON CONFLICT (neighborhood_name) DO NOTHING;
+
+-- Inserisci nella tabella place
+INSERT INTO place (borough_id, neighborhood_id, address)
+SELECT DISTINCT
+    b.id AS borough_id,
+    n.id AS neighborhood_id,
+    rd."address"
+FROM raw_data rd
+JOIN borough b ON b.borough_name = rd."borough"
+JOIN neighborhood n ON n.neighborhood_name = rd."neighborhood"
+ON CONFLICT (borough_id, neighborhood_id, address) DO NOTHING;
+
+-- Inserisci nella tabella property
+INSERT INTO property (
+    zip_code, residential_units, commercial_units, total_units,
+    land_square_feet, year_built, building_class_category,
+    building_macro_class_category, land_square_category,
+    borough_id, block, lot, place_id
+)
+SELECT
+    rd."ZIP CODE", rd."RESIDENTIAL UNITS", rd."COMMERCIAL UNITS", rd."TOTAL UNITS",
+    rd."LAND SQUARE FEET", rd."YEAR BUILT", rd."BUILDING CLASS DESCRIPTION",
+    rd."BUILDING MACRO CLASS DESCRIPTION", rd."LAND SQUARE CATEGORY",
+    b.id AS borough_id, rd."block", rd."lot", p.id AS place_id
+FROM raw_data rd
+JOIN borough b ON b.borough_name = rd."borough"
+JOIN place p ON p.borough_id = b.id AND p.address = rd."address"
+ON CONFLICT (borough_id, block, lot) DO NOTHING;
+
+-- Inserisci nella tabella sale
+INSERT INTO sale (sale_date, sale_price, property_id)
+SELECT
+    TO_DATE(rd."SALE DATE", 'DD/MM/YYYY'), rd."SALE PRICE", pr.id
+FROM raw_data rd
+JOIN property pr ON pr.borough_id = (SELECT id FROM borough WHERE borough_name = rd."borough")
+                AND pr.block = rd."block"
+                AND pr.lot = rd."lot"
+ON CONFLICT DO NOTHING;
+
+-- Inserisci nella tabella crime_index
+INSERT INTO crime_index (borough_id, crime_index)
+SELECT DISTINCT
+    b.id AS borough_id,
+    rd."CRIME INDEX"
+FROM raw_data rd
+JOIN borough b ON b.borough_name = rd."borough"
+ON CONFLICT (borough_id) DO NOTHING;
+
+-- Inserisci nella tabella neighborhood_stats
+INSERT INTO neighborhood_stats (neighborhood_id, poverty_rate, median_income, perc_white, perc_black)
+SELECT DISTINCT
+    n.id AS neighborhood_id,
+    rd."nyc_poverty_rate" AS poverty_rate,
+    rd."median_income",
+    rd."perc_white",
+    rd."perc_black"
+FROM raw_data rd
+JOIN neighborhood n ON n.neighborhood_name = rd."neighborhood"
+ON CONFLICT (neighborhood_id) DO NOTHING;
