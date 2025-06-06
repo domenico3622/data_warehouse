@@ -1,0 +1,59 @@
+-- Inserisci nella tabella dim_date
+INSERT INTO dim_date (sale_date, month, year)
+SELECT DISTINCT
+    TO_DATE("SALE DATE", 'DD/MM/YYYY') AS sale_date,
+    EXTRACT(MONTH FROM TO_DATE("SALE DATE", 'DD/MM/YYYY')) AS month,
+    EXTRACT(YEAR FROM TO_DATE("SALE DATE", 'DD/MM/YYYY')) AS year
+FROM raw_data;
+
+-- Inserisci nella tabella dim_address
+INSERT INTO dim_address (address, neighborhood, borough, median_income, poverty_rate, perc_white, perc_black, crime_index)
+SELECT DISTINCT
+    "address",
+    "neighborhood",
+    "borough",
+    "median_income",
+    "nyc_poverty_rate" AS poverty_rate,
+    "perc_white",
+    "perc_black",
+    "CRIME INDEX" AS crime_index
+FROM raw_data;
+
+-- Inserisci nella tabella dim_build_category
+INSERT INTO dim_build_category (macro_class_category, class_category)
+SELECT DISTINCT
+    "BUILDING MACRO CLASS DESCRIPTION" AS macro_class_category,
+    "BUILDING CLASS DESCRIPTION" AS class_category
+FROM raw_data;
+
+-- Inserisci nella tabella dim_land_square_category
+INSERT INTO dim_land_square_category (land_square_category)
+SELECT DISTINCT "LAND SQUARE CATEGORY"
+FROM raw_data;
+
+-- Inserisci nella tabella dim_year_built
+INSERT INTO dim_year_built (year_built)
+SELECT DISTINCT "YEAR BUILT"
+FROM raw_data;
+
+-- Inserisci nella tabella fact_sales
+INSERT INTO fact_sales (
+    id_build_category, id_date, id_address, id_land_square_category,
+    price, total_units, land_square_feet, id_year_built
+)
+SELECT
+    bc.id_build_category,
+    dd.id_date,
+    da.id_address,
+    dl.id_land_square_category,
+    rd."SALE PRICE" AS price,
+    rd."TOTAL UNITS" AS total_units,
+    rd."LAND SQUARE FEET" AS land_square_feet,
+    dy.id_year_built
+FROM raw_data rd
+JOIN dim_date dd ON dd.sale_date = TO_DATE(rd."SALE DATE", 'DD/MM/YYYY')
+JOIN dim_address da ON da.address = rd."address" AND da.neighborhood = rd."neighborhood" AND da.borough = rd."borough"
+JOIN dim_build_category bc ON bc.macro_class_category = rd."BUILDING MACRO CLASS DESCRIPTION" AND bc.class_category = rd."BUILDING CLASS DESCRIPTION"
+JOIN dim_land_square_category dl ON dl.land_square_category = rd."LAND SQUARE CATEGORY"
+JOIN dim_year_built dy ON dy.year_built = rd."YEAR BUILT";
+
