@@ -25,3 +25,7 @@ This project implements a Data Warehouse (DW) solution for New York City real es
 - `populateReconcilied.sql`: Populates the reconciled schema with cleaned, integrated data.
 - `createDW.sql`: Creates the **star schema** for the Data Warehouse.
 - `populateDW.sql`: Loads data from the reconciled schema into the Data Warehouse.
+
+## 📊 Dashboards
+![Dashboard 1](img/dashboard1.png)
+![Dashboard 2](img/dashboard2.png)
